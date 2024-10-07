@@ -5,25 +5,39 @@ using System.Text;
 
 public class MoverObjeto : MonoBehaviour
 {
-    public int numero;
+    public GeneralShape shape;
+    public Sprite[] sprites;
+
+    public SpriteRenderer spriteRenderer;
+
+    public int id;
 
     void Start()
     {
-        gameObject.name = numero.ToString();
-        float x = SocketClient.Shapes[numero].x;
-        float y = SocketClient.Shapes[numero].y;
-        transform.position = new Vector3(x / 10, y / 10, 0);
+        gameObject.name = shape.number.ToString();
+        spriteRenderer = GetComponent<SpriteRenderer>();
+        id = shape.id;
+        spriteRenderer.sprite = sprites[id];
+        float x = shape.x;
+        float y = shape.y;
+        transform.position = new Vector3((x / 10) - 30, (y / 10) - 20, 0);
     }
 
     void Update()
     {
-        float x = SocketClient.Shapes[numero].x;
-        float y = SocketClient.Shapes[numero].y;
-        transform.position = new Vector3(x / 10, y / 10, 0);
+        setFigura(SocketClient.Shapes[shape.number]);
+        if (id != shape.id)
+        {
+            id = shape.id;
+            spriteRenderer.sprite = sprites[id];
+        }
+        float x = shape.x;
+        float y = shape.y;
+        transform.position = new Vector3((x / 10) - 30, (y / 10) - 20, 0);
     }
 
-    void setNumero(int data)
+    void setFigura(GeneralShape data)
     {
-        this.numero = data;
+        this.shape = data;
     }
 }

@@ -247,6 +247,7 @@ MonoBehaviour:
   - {fileID: 8728382782146590875, guid: f340a3e2ccfb59c439eaf614ebaf0e49, type: 3}
   - {fileID: 834596371768598453, guid: 87e845ce5da60334598ec56a51aac1fe, type: 3}
   - {fileID: 2164508159788207803, guid: 2eae48213aac0994a8ee0839d7850ef5, type: 3}
+  oldMessage: 
 --- !u!4 &1056605393
 Transform:
   m_ObjectHideFlags: 0

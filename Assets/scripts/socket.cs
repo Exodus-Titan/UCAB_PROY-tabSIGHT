@@ -12,6 +12,7 @@ public class SocketClient : MonoBehaviour
 {
     public static List<GeneralShape> Shapes;
     public GameObject[] prefabShape; // Prefab de la figura que queremos generar
+    public string oldMessage = null;
 
 
     public static SocketClient instance;
@@ -70,67 +71,88 @@ public class SocketClient : MonoBehaviour
                 //string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
 
                 // Separar los valores 'x' y 'y' utilizando la coma como delimitador
-
-                if ((message == "") || (message == "[]"))
+                if (oldMessage != message)
                 {
-                    Debug.Log("No data");
-                }
-                else
-                {
-                    string message1 = message.Replace("[", "");
-                    string message2 = message1.Replace("]", "");
-                    string[] formas = message2.Split(", '?'");
-                    Array.Resize(ref formas, formas.Length - 1);
-
-                    if (!(formas.Length <= Shapes.Count))
+                    if ((message == "[]"))
                     {
-
-
-                        int count = 0;
-                        foreach (var forma in formas)
-                        {
-                            if (count == 0)
-                            {
-                                string[] data = forma.Split(',');
-
-                                GeneralShape figura = new GeneralShape(int.Parse(data[0]), int.Parse(data[1]), float.Parse(data[2], CultureInfo.InvariantCulture), float.Parse(data[3], CultureInfo.InvariantCulture), float.Parse(data[4], CultureInfo.InvariantCulture));
-                                Shapes.Add(figura);
-
-                                Vector3 position = new Vector3(figura.x, figura.y, 0);
-                                GameObject prefabElejido = prefabShape[figura.id];
-                                GameObject newShape = Instantiate(prefabElejido, position, Quaternion.identity);
-
-                                MoverObjeto shapeScript = newShape.GetComponent<MoverObjeto>();
-                                shapeScript.numero = figura.number;
-
-                            }
-                            else
-                            {
-                                string formaAux = forma.Remove(0, 1);
-                                string[] data = formaAux.Split(',');
-                                GeneralShape figura = new GeneralShape(int.Parse(data[0]), int.Parse(data[1]), float.Parse(data[2], CultureInfo.InvariantCulture), float.Parse(data[3], CultureInfo.InvariantCulture), float.Parse(data[4], CultureInfo.InvariantCulture));
-                                Shapes.Add(figura);
-                                Vector3 position = new Vector3(figura.x, figura.y, 0);
-                                GameObject prefabElejido = prefabShape[figura.id];
-                                GameObject newShape = Instantiate(prefabElejido, position, Quaternion.identity);
-                                MoverObjeto shapeScript = newShape.GetComponent<MoverObjeto>();
-                                shapeScript.numero = figura.number;
-                            }
-                            count = count + 1;
-
-                        }
+                        Debug.Log("No data");
                     }
                     else
-                      if (!(formas.Length == Shapes.Count))
                     {
+                        oldMessage = message;
+                        string message1 = message.Replace("[", "");
+                        string message2 = message1.Replace("]", "");
+                        string[] formas = message2.Split(", '?'");
+                        Array.Resize(ref formas, formas.Length - 1);
 
-                        Shapes.Clear();
-                        foreach (var shape in Shapes)
+                        if ((formas.Length >= Shapes.Count))
                         {
-                            Destroy(GameObject.Find(shape.number.ToString()));
-                        }
-                    }
 
+
+                            int count = 0;
+                            foreach (var forma in formas)
+                            {
+                                if (count == 0)
+                                {
+                                    string[] data = forma.Split(',');
+                                    GeneralShape figura = new GeneralShape(int.Parse(data[0]), int.Parse(data[1]), float.Parse(data[2], CultureInfo.InvariantCulture), float.Parse(data[3], CultureInfo.InvariantCulture), float.Parse(data[4], CultureInfo.InvariantCulture));
+                                    if (count == Shapes.Count)
+                                    {
+                                        GenerateShape(figura);
+                                    }
+                                    else
+                                    {
+                                        if ((figura.id != Shapes[count].id) && (figura.number != Shapes[count].number))
+                                        {
+                                            GenerateShape(figura);
+                                        }
+                                        else
+                                        {
+                                            Debug.Log("objeto duplicado");
+                                            Shapes[count] = figura;
+                                        }
+                                    }
+
+                                }
+                                else
+                                {
+                                    string formaAux = forma.Remove(0, 1);
+                                    string[] data = formaAux.Split(',');
+                                    GeneralShape figura = new GeneralShape(int.Parse(data[0]), int.Parse(data[1]), float.Parse(data[2], CultureInfo.InvariantCulture), float.Parse(data[3], CultureInfo.InvariantCulture), float.Parse(data[4], CultureInfo.InvariantCulture));
+                                    if (count >= Shapes.Count)
+                                    {
+                                        Debug.Log("Hasta aqui va bien xd");
+                                        GenerateShape(figura);
+                                        Debug.Log("No habia objeto numero {figura.number}");
+                                    }
+                                    else
+                                    {
+                                        if ((figura.id != Shapes[count].id) && (figura.number != Shapes[count].number))
+                                        {
+                                            GenerateShape(figura);
+                                            Debug.Log("No habia objeto numero {figura.number}");
+                                        }
+                                        else
+                                        {
+                                            Debug.Log("objeto duplicado");
+                                            Shapes[count] = figura;
+                                        }
+                                    }
+                                }
+                                count = count + 1;
+
+                            }
+                        }
+                        else
+                        {
+                            foreach (var shape in Shapes)
+                            {
+                                Destroy(GameObject.Find(shape.number.ToString()));
+                            }
+                            Shapes.Clear();
+                        }
+
+                    }
                 }
 
 
@@ -150,6 +172,13 @@ public class SocketClient : MonoBehaviour
         }
     }
 
+    public void GenerateShape(GeneralShape figura)
+    {
+        Shapes.Add(figura);
+        Vector3 position = new Vector3(figura.x, figura.y, 0);
+        GameObject prefabElejido = prefabShape[0];
+        GameObject newShape = Instantiate(prefabElejido, position, Quaternion.identity);
+        MoverObjeto shapeScript = newShape.GetComponent<MoverObjeto>();
+        shapeScript.shape = figura;
+    }
 }
-
-
